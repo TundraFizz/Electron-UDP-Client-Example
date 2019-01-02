@@ -1,0 +1,21 @@
+{
+  "name": "electron-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "author": "Tundra Fizz",
+  "license": "ISC",
+  "dependencies": {
+    "electron": "latest",
+    "jquery": "latest"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TundraFizz/Tundra-Fizz"
+  },
+  "scripts": {
+    "local1": "set port=9001&& electron .",
+    "local2": "set port=9002&& electron ."
+  }
+}
