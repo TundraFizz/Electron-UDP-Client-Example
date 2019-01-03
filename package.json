@@ -1,5 +1,5 @@
 {
-  "name": "electron-server",
+  "name": "electron-udp-client-example",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -7,6 +7,7 @@
   "license": "ISC",
   "dependencies": {
     "electron": "latest",
+    "electron-reload": "^1.4.0",
     "jquery": "latest"
   },
   "devDependencies": {},
@@ -15,7 +16,7 @@
     "url": "https://github.com/TundraFizz/Tundra-Fizz"
   },
   "scripts": {
-    "local1": "set port=9001&& electron .",
-    "local2": "set port=9002&& electron ."
+    "local1": "set port=9001&& nodemon --exec \"electron .\"",
+    "local2": "set port=9002&& nodemon --exec \"electron .\""
   }
 }

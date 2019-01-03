@@ -3,29 +3,49 @@ var EmitMessage = require("electron").remote.app.emit;
 
 function SendMessage(func, data = null){
   EmitMessage("message", {
-    "function": func,
-    "data"    : JSON.stringify(data)
+    "f": func,
+    "d": JSON.stringify(data)
   });
 }
 
-$("#testing").click(function(){
-  SendMessage("Testing", {"yolo": "swag"});
+// $("#submit").click(function(){
+//   var name = $("#name").val();
+//   var text = $("#text").val();
+
+//   SendMessage("Testing2", {
+//     "name": name,
+//     "text": text
+//   });
+// });
+
+$("body").on("click", ".join-room", function(){
+  SendMessage("JoinRoom", {
+    "room": $(this).text()
+  });
 });
 
-$("#testing2").click(function(){
-  SendMessage("Testing2", {"qqqqqqqq": "wwwwwwww"});
-});
+var qwe = {};
 
-function REEEEEE(data){
-  console.log(data);
-  $("#messages").append(`<div>${JSON.stringify(data)}</div>`);
-}
+ipc.on("message", (event, data) => {
+  console.log(data.f);
+  console.log(data.d);
 
-ipc.on("message", (event, msg) => {
   try{
-    eval(`${msg.function}(${msg.data});`);
+    qwe[data.f](data.d);
   }catch(err){
-    console.log(`ERROR: The function "${msg.function}" doesn't exist`);
-    REEEEEE(msg.data)
+    console.log(`ERROR: The function "${data.f}" doesn't exist`);
   }
 });
+
+qwe.UpdateRooms = (data) => {
+  var template = `
+  <% for(var i in data){ %>
+    <div>
+      <span class="join-room"><%= i %></span>: <%= data[i].length %> users in this room
+    </div>
+  <% } %>
+  `;
+
+  var html = ejs.render(template, {"data": data});
+ $("#room-list").html(html);
+}

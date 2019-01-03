@@ -1,8 +1,11 @@
-// var {app, BrowserWindow} = require("electron");
 var {app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, clipboard, shell, dialog} = require("electron");
 var path = require("path");
 var url  = require("url");
 var $    = require("jquery");
+
+require("electron-reload")(__dirname + "/app/index.html", {
+  electron: path.join(__dirname, "node_modules", ".bin", "electron")
+});
 
 // Keep a global reference of the window object, if you don't, the window will be closed automatically when the JavaScript object is garbage collected
 var win;
@@ -41,45 +44,76 @@ app.on("activate", () => {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Messages received from the client
-app.on("message", (msg) => {
+var in_  = {}; // In the future, have a module create the object?
+var out_ = {}; // In the future, have a module create the object?
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// RECEIVING MESSAGES: window
+
+app.on("message", (data) => {
   try{
-    eval(`${msg.function}(${msg.data});`);
+    UDP(data.f, data.d);
+    // out_[data.f](data.d);
   }catch(err){
-    console.log(`ERROR: The function "${msg.function}" doesn't exist`);
+    console.log(`ERROR: The function "${data.f}" doesn't exist`);
   }
 });
 
-function Testing(data){
-  console.log("============= TESTING =============");
-  console.log(data);
-  console.log(data.yolo);
-  SendMessage("HelloWorld", data);
-}
-
-function SendMessage(func, data = null){
-  win.webContents.send("message", {
-    "function": func,
-    "data"    : data
-  });
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// RECEIVING MESSAGES: server
 
 var client = require("dgram").createSocket("udp4").bind(process.env.port);
-
-client.on("message", async(message) => {
-  var data = JSON.parse(message.toString("utf-8"));
-  console.log(data);
-  SendMessage("REEEEEE", data);
-});
 
 client.on("listening", () => {
   console.log(`Listening on port ${client.address().port}`);
 });
 
-function Testing2(data){
-  var packet = JSON.stringify(data);
-  var message = Buffer.from(packet);
+client.on("message", async(message) => {
+  var data = JSON.parse(message.toString("utf-8"));
+  console.log("=============================");
+  console.log(data);
+  try{
+    in_[data.f](data.d);
+  }catch(err){
+    console.log(err);
+    console.log(`ERROR: The function "${data.f}" doesn't exist`);
+  }
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// SENDING MESSAGES: window
+
+function SendMessage(func, data = null){
+  win.webContents.send("message", {
+    "f": func,
+    "d": data
+  });
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// SENDING MESSAGES: server
+
+function UDP(func, data = null){
+  var message = Buffer.from(JSON.stringify({
+    "f": func,
+    "d": data
+  }));
+
   client.send(message, 0, message.length, 9000, "localhost");
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+in_.UpdateRooms = (data) => {
+  console.log(data);
+  SendMessage("UpdateRooms", data);
+}
+
+out_.JoinRoom = (data) => {
+  console.log("JOIN A ROOM!");
+  console.log(data);
+}
+
+out_.ChatMessage = (data) => {
+  UDP("ChatMessage", data);
 }
