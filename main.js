@@ -20,7 +20,7 @@ app.on("ready", () => {
     "slashes" : true
   }));
 
-  win.webContents.openDevTools(); // Open DevTools
+  // win.webContents.openDevTools(); // Open DevTools
 
   // Emitted when the window is closed.
   win.on("closed", () => {
@@ -52,8 +52,7 @@ var out_ = {}; // In the future, have a module create the object?
 
 app.on("message", (data) => {
   try{
-    UDP(data.f, data.d);
-    // out_[data.f](data.d);
+    out_[data.f](data.d);
   }catch(err){
     console.log(`ERROR: The function "${data.f}" doesn't exist`);
   }
@@ -111,7 +110,10 @@ in_.UpdateRooms = (data) => {
 
 out_.JoinRoom = (data) => {
   console.log("JOIN A ROOM!");
-  console.log(data);
+  UDP("JoinRoom", JSON.stringify({
+    "name": data.name,
+    "room": data.room
+  }));
 }
 
 out_.ChatMessage = (data) => {

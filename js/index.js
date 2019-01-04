@@ -4,22 +4,13 @@ var EmitMessage = require("electron").remote.app.emit;
 function SendMessage(func, data = null){
   EmitMessage("message", {
     "f": func,
-    "d": JSON.stringify(data)
+    "d": data
   });
 }
 
-// $("#submit").click(function(){
-//   var name = $("#name").val();
-//   var text = $("#text").val();
-
-//   SendMessage("Testing2", {
-//     "name": name,
-//     "text": text
-//   });
-// });
-
 $("body").on("click", ".join-room", function(){
   SendMessage("JoinRoom", {
+    "name": $("#name").val(),
     "room": $(this).text()
   });
 });
